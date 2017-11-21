@@ -13,7 +13,7 @@ Install openCV as per the official method. Only C/C++ installation is sufficient
 * Run `sudo make install`
 
 ### Clone this project
-You're done setting up after this step
+You're done setting up after this step.
 
 # Usage
 * To view the working of optical flow
