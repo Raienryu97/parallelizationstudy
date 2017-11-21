@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 2.8)
+
+project( lkp )
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_executable( lkp opticalflow_pll.cpp )
+target_link_libraries( lkp ${OpenCV_LIBS} )
+
+project( lks )
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_executable( lks opticalflow_srl.cpp )
+target_link_libraries( lks ${OpenCV_LIBS} )
