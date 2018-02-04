@@ -18,16 +18,11 @@ You're done setting up after this step.
 
 # Usage
 * To view the working of optical flow
-  * `cmake .`
-  * `make -j8`
-  * `./lk imX.jpg imY.jpg` (replace X and Y with 1,2 or 3,4)
-* To test performance
-  * `cd tests`
-  * `./timing.sh`
+  * `./automate.sh`
 
-# Results
-
-### Optical Flow
-![Hand Moving Upwards](Results/working.png)
-
-![Performance](Results/performance.png)
+# Additional Notes
+* Any video can be extracted into a series of frames by using ffmpeg
+* The command `ffmpeg -i videoplayback.webm -r 10 "inputs/%d.jpg"` should be run from the root of the repository
+    * The name of the input video file should be given after the `-i` flag
+    * The fps (Frames Per Second) rate at which the video should be extracted should be given after the `-r` flag
+    * The number of images present in inputs folder should be reflected in the `NUM_INPUTS` definition in the opticalflow.cpp file

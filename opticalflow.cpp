@@ -20,89 +20,86 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include <time.h>
-#include <omp.h>
+#include <sys/time.h>
+#include <string>
 
+using std::string;
 using namespace cv;
 using namespace std;
 
-int main(int argc, char** argv) {
-	// Initialize, load two images from the file system, and
-	// allocate the images and other structures we will need for
-	// results.
+void lkk(string image1, string image2, int k);
 
-	if(argc!=3){
-		printf("Insufficient / Extra arguements provided\n");
-		return -1;
+//The number of images in the inputs folder
+#define NUM_INPUTS 102
+
+
+int main() {
+	int k;
+	struct timeval start,end;
+	double elapsedTime;
+
+	gettimeofday(&start,NULL);
+
+  //Run the algorithm on every two consecutive images
+	for(int i=0;i<NUM_INPUTS-1;i++){
+		string im1="inputs/",im2="inputs/";
+		k=i+1;
+		im1 += to_string(k);
+		im1 += ".jpg";
+		im2 += to_string(k+1);
+		im2 += ".jpg";
+		lkk(im1,im2,k);
+		printf("[%d] Completed algorithm run on images %d.jpg and %d.jpg\n",k,k,k+1);
 	}
 
-	char * image1,*image2;
-	image1 = argv[1];
-	image2 = argv[2];
+	gettimeofday(&end,NULL);;
 
-	Mat imgA = imread(image1,CV_LOAD_IMAGE_GRAYSCALE);
-	Mat imgB = imread(image2,CV_LOAD_IMAGE_GRAYSCALE);
-
-	if(!imgA.data || !imgB.data){
-		printf("Either or both of the images are empty\n");
-		return -1;
-	}
-
-	Size img_sz = imgA.size();
-	int win_size = 10;
-	Mat imgC = imread(image1,CV_LOAD_IMAGE_UNCHANGED);
-
-	// The first thing we need to do is get the features
-	// we want to track.
-	vector<Point2f> cornersA, cornersB;
-	const int MAX_CORNERS = 500;
-	goodFeaturesToTrack(imgA, cornersA, MAX_CORNERS, 0.01, 5, noArray(), 3, false, 0.04);
-
-	cornerSubPix(imgA, cornersA, Size(win_size, win_size), Size(-1,-1),
-	TermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03));
-
-	vector<uchar> features_found;
-
-	clock_t begin = clock();
-
-	/*
-		<Optimisation>
-
-		The calcOpticalFlowPyrLK function uses openCV's parallel framework via
-		making a call to parallel_for_ in the source code. This has been tested
-		to give bad results and thus we are forcing this function to run only on
-		a single thread.
-	*/
-	setNumThreads(1);
-  // Call the Lucas Kanade algorithm
-	calcOpticalFlowPyrLK(imgA, imgB, cornersA, cornersB, features_found, noArray(),
-	Size(win_size*4+1,win_size*4+1), 5,
-	TermCriteria( CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, .3 ));
-
-	/*
-	<Optimisation>
-
-	We parallelise this for loop by using the openMP directive and set
-	number of threads back to 4 (default)
-	TODO: Do not hardcode number of threads to 4
-	*/
-	setNumThreads(4);
-	#pragma omp parallel for
-
-	//Draw arrows to show flow direction
-	for( int i = 0; i < (int)cornersA.size(); i++ ) {
-		if( !features_found[i] )
-		continue;
-		arrowedLine(imgC, cornersA[i], cornersB[i], Scalar(0,0,255),1, CV_AA);
-	}
-
-	clock_t end = clock();
-	printf("Elapsed: %f seconds\n", (double)(end - begin) / CLOCKS_PER_SEC);
-
-	//Show the results
-	imshow("ImageA",imgA);
-	imshow("ImageB",imgB);
-	imshow("LKpyr_OpticalFlow",imgC);
-	waitKey(0);
+	elapsedTime = (end.tv_sec - start.tv_sec) * 1000.0;
+	elapsedTime += (end.tv_usec - start.tv_usec) / 1000.0;
+	printf("Elapsed: %.3f seconds\n", elapsedTime / 1000);
 	return 0;
 }
+
+void lkk(string image1,string image2,int k)
+	{
+
+		string outputImage = "outputs/result_";
+		outputImage += to_string(k);
+		outputImage += ".jpg";
+
+		Mat imgA = imread(image1,CV_LOAD_IMAGE_GRAYSCALE);
+		Mat imgB = imread(image2,CV_LOAD_IMAGE_GRAYSCALE);
+
+		if(!imgA.data || !imgB.data){
+			printf("Either or both of the images %s and %s are empty\n", image1.c_str(),image2.c_str());
+			return ;
+		}
+
+		Size img_sz = imgA.size();
+		int win_size = 10;
+		Mat imgC = imread(image1,CV_LOAD_IMAGE_UNCHANGED);
+
+		// The first thing we need to do is get the features
+		// we want to track.
+		vector<Point2f> cornersA, cornersB;
+		const int MAX_CORNERS = 500;
+		goodFeaturesToTrack(imgA, cornersA, MAX_CORNERS, 0.01, 5, noArray(), 3, false, 0.04);
+
+		cornerSubPix(imgA, cornersA, Size(win_size, win_size), Size(-1,-1),
+		TermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03));
+
+		vector<uchar> features_found;
+
+		// Call the Lucas Kanade algorithm
+		calcOpticalFlowPyrLK(imgA, imgB, cornersA, cornersB, features_found, noArray(),
+		Size(win_size*4+1,win_size*4+1), 5,
+		TermCriteria( CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, .3 ));
+
+		// Now make some image of what we are looking at:
+		for( int i = 0; i < (int)cornersA.size(); i++ ) {
+			if( !features_found[i] )
+			continue;
+			arrowedLine(imgC, cornersA[i], cornersB[i], Scalar(0,0,255),1, CV_AA);
+		}
+		imwrite( outputImage, imgC );
+	}
