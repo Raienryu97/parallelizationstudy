@@ -1,6 +1,8 @@
 # parallelizationstudy
 
-A performance study of parallelisation on the Lucas-Kanade Optical Flow algorithm.
+A performance study of parallelisation on
+* Block Matrix Multiplication by [Evan Purkhiser](https://github.com/EvanPurkhiser/CS-Matrix-Multiplication)
+* Lucas-Kanade Optical Flow algorithm using OpenCV
 
 # Setup
 
@@ -13,12 +15,57 @@ Install openCV as per the official method. Only C/C++ installation is sufficient
 * Run `make -jX` where X is twice the number of your CPU cores ( `make -j8` for a quad core processor)
 * Run `sudo make install`
 
+### Installation Of ffmpeg
+`sudo apt-get install ffmpeg`
+
 ### Clone this project
 You're done setting up after this step.
 
 # Usage
-* To view the working of optical flow
-  * `./automate.sh`
+
+### Block Matrix Multiplication
+
+```bash
+# From root of the cloned repository
+cd BMM/
+
+# Run the script that automates compilation and execution
+./automate.sh
+```
+
+### Lukas Kanade Optical Flow
+* Run directly as shown below for single core execution
+* For multi-core execution, first add the `-fopenmp` flag to line #5 @ CMakeLists.txt and then follow instructions as shown below
+
+```bash
+# From root of the cloned repository
+cd OpticalFlow/
+
+# For Processing over Full HD images
+# ffmpeg -i videoplayback.webm -r 10 "inputs/%d.jpg"
+
+# For Processing over 4K images
+ffmpeg -i videoplayback1.webm -r 10 "inputs/%d.jpg"
+
+# Run the script that automates compilation and execution
+./automate.sh
+```
+
+# Results
+
+### Overall Speedup
+|Parallelization Technique|Lukas Kanade Optical Flow|Block Matrix Multiplication    |
+| ----------------------- |-------------------------| ------------------------------|
+| OpenMP                  | 4.5 (500 4K Images)     | 5.3 (Matrix Size 4096X4096)   |
+| OpenACC                 | Not Applicable          | 13.2 (Matrix Size 4096X4096)  |
+
+### Block Matrix Multiplication Execution Times in seconds (ET) and Speedups
+|Matrix Size  |Single Core ET|Multi Core ET|GPU ET |OpenMP Speedup|OpenACC Speedup|
+|-------------|--------------|-------------|-------|--------------|---------------|
+| 512X512     | 0.812        | 0.151       | 0.231 |5.4           |3.5            |
+| 1024X1024   | 7.1855       | 1.300       | 1.140 |5.5           |6.3            |
+| 2048X2048   | 56.094       | 11.095      | 8.827 |5.1           |6.4            |
+| 4096X4096   | 861.111      | 163.065     | 65.317|5.3           |13.2           |
 
 # Additional Notes
 * Any video can be extracted into a series of frames by using ffmpeg
