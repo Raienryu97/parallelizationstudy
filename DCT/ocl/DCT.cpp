@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define MATRIX_SIZE 2048
+#define MATRIX_SIZE 256
 #define BLOCK_SIZE 8
 
 string getPlatformName(cl_platform_id id) {
@@ -118,9 +118,9 @@ int main() {
 			optimalPlatform = platformIDs[i];
 			optimalPlatformId = i;
 		}
-		cout << endl << "Devices on " << getPlatformName(platformIDs[i]) << "Platform" << endl;
+		//cout << endl << "Devices on " << getPlatformName(platformIDs[i]) << "Platform" << endl;
 		for (cl_uint j = 0; j < numDevices[i]; j++) {
-			cout << "[" << j + 1 << "] : " << getDeviceName(deviceIDs[i][j]) << endl;
+			//cout << "[" << j + 1 << "] : " << getDeviceName(deviceIDs[i][j]) << endl;
 		}
 	}
 
@@ -176,8 +176,8 @@ int main() {
 		}
 	}
 
-	cout << endl << "About to run DCT on matrix of size " << matrixSize << " X " << matrixSize << endl;
-	cout << endl << "Execution Time on :" << endl << endl;
+	//cout << endl << "About to run DCT on matrix of size " << matrixSize << " X " << matrixSize << endl;
+	//cout << endl << "Execution Time on :" << endl << endl;
 
 	for (unsigned int id = 0; id < numDevices[optimalPlatformId]; id++) {
 
@@ -210,7 +210,7 @@ int main() {
 		globalSize[1] = matrixSize;
 
 		//Generate command queue
-		cl_command_queue queue = clCreateCommandQueueWithProperties(context, deviceIDs[optimalPlatformId][id], 0, &error);
+		cl_command_queue queue = clCreateCommandQueue(context, deviceIDs[optimalPlatformId][id], 0, &error);
 		checkError(error);
 
 		//Write input vectors to device
@@ -234,7 +234,7 @@ int main() {
 		checkError(clEnqueueReadBuffer(queue, d_y, CL_TRUE, 0, bytes, tempGPU, 0, NULL, NULL));
 
 		//Generate command queue
-		cl_command_queue queue1 = clCreateCommandQueueWithProperties(context, deviceIDs[optimalPlatformId][id], 0, &error);
+		cl_command_queue queue1 = clCreateCommandQueue(context, deviceIDs[optimalPlatformId][id], 0, &error);
 		checkError(error);
 
 		//Write input vectors to device
@@ -260,7 +260,7 @@ int main() {
 		elapsedTime /= 1000.0;
 
 		//Calculate the GFLOPS obtained and print it along with the execution time
-		cout << "[" << id + 1 << "] " << getDeviceName(deviceIDs[optimalPlatformId][id]) << ": " << elapsedTime << " seconds " << endl;
+		printf("OpenCL          : %.3f seconds\n",elapsedTime);
 		//Release OpenCL resources
 		clReleaseMemObject(d_x);
 		clReleaseMemObject(d_y);
@@ -277,7 +277,7 @@ int main() {
 	clReleaseKernel(kernel1);
 	clReleaseContext(context);
 
-	gettimeofday(&start, NULL);
+/*	gettimeofday(&start, NULL);
 
 	#pragma omp parallel for collapse(2)
 	for (int i = 0; i < matrixSize; i += BLOCK_SIZE) {
@@ -360,18 +360,7 @@ int main() {
 	elapsedTime = (end.tv_sec - start.tv_sec) * 1000.0;
   	elapsedTime += (end.tv_usec - start.tv_usec) / 1000.0;
 	elapsedTime /= 1000.0;
-	cout << endl << "Single thread CPU : " << elapsedTime << " seconds" << endl;
+	cout << endl << "Single thread CPU : " << elapsedTime << " seconds" << endl;*/
 
-	int count = 0;
-	for (int i = 0;i < matrixSize;i++) {
-		for (int j = 0; j < matrixSize;j++) {
-			if (*(dctCoeffMatrix + i * matrixSize + j) != *(dctCoeffMatrixGPU + i * matrixSize + j)) {
-				cout << "[ " << i << " , " << j << " ]" << *(dctCoeffMatrix + i * matrixSize + j) << " : " <<  *(dctCoeffMatrixGPU + i * matrixSize + j) << endl;
-				count++;
-			}
-		}
-	}
-
-	cout << endl << "Found " << count << " errors in the output matrix of GPU" << endl;
 	return 0;
 }

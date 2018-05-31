@@ -5,6 +5,7 @@ FIND_PATH(OPENCL_INCLUDE_DIR
 		$ENV{AMDAPPSDKROOT}/include
 		$ENV{INTELOCLSDKROOT}/include
 		$ENV{NVSDKCOMPUTE_ROOT}/OpenCL/common/inc
+		/usr/local/cuda/include
 		# Legacy Stream SDK
 		$ENV{ATISTREAMSDKROOT}/include)
 
@@ -22,6 +23,7 @@ ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 		$ENV{AMDAPPSDKROOT}/lib/x86_64
 		$ENV{INTELOCLSDKROOT}/lib/x64
 		$ENV{NVSDKCOMPUTE_ROOT}/OpenCL/common/lib/x64
+		/usr/local/cuda/lib64
 		# Legacy stream SDK
 		$ENV{ATISTREAMSDKROOT}/lib/x86_64)
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)

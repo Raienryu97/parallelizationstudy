@@ -6,7 +6,7 @@
 #include <math.h>
 #include "sys/time.h"
 
-#define MATRIX_SIZE 2048
+#define MATRIX_SIZE 256
 #define BLOCK_SIZE  16
 
 using namespace std;
@@ -102,9 +102,9 @@ int main() {
 			optimalPlatform = platformIDs[i];
 			optimalPlatformId = i;
 		}
-		cout << endl << "Devices on " << getPlatformName(platformIDs[i]) << "Platform" << endl;
+		//cout << endl << "Devices on " << getPlatformName(platformIDs[i]) << "Platform" << endl;
 		for (cl_uint j = 0; j < numDevices[i]; j++) {
-			cout << "[" << j + 1 << "] : " << getDeviceName(deviceIDs[i][j]) << endl;
+			//cout << "[" << j + 1 << "] : " << getDeviceName(deviceIDs[i][j]) << endl;
 		}
 	}
 
@@ -133,8 +133,8 @@ int main() {
 	double numOps;
 	float gFLOPS;
 
-	cout << endl << "About to multiply two matrices of sizes " << matrixSize << " X " << matrixSize << endl;
-	cout << endl << "Execution Time and GFLOPS count on :" << endl << endl ;
+	//cout << endl << "About to multiply two matrices of sizes " << matrixSize << " X " << matrixSize << endl;
+	//cout << endl << "Execution Time and GFLOPS count on :" << endl << endl ;
 
 	for (unsigned int id = 0; id < numDevices[optimalPlatformId]; id++) {
 
@@ -165,7 +165,7 @@ int main() {
 		globalSize[1] = matrixSize;
 
 		//Generate command queue
-		cl_command_queue queue = clCreateCommandQueueWithProperties(context, deviceIDs[optimalPlatformId][id], 0, &error);
+		cl_command_queue queue = clCreateCommandQueue(context, deviceIDs[optimalPlatformId][id], 0, &error);
 		checkError(error);
 
 		//Write input vectors to device
@@ -192,13 +192,13 @@ int main() {
 
 		gettimeofday(&end, NULL);
 		elapsedTime = (end.tv_sec - start.tv_sec) * 1000.0;
-    elapsedTime += (end.tv_usec - start.tv_usec) / 1000.0;
+    	elapsedTime += (end.tv_usec - start.tv_usec) / 1000.0;
 		elapsedTime /= 1000.0;
 
 		//Calculate the GFLOPS obtained and print it along with the execution time
 		numOps = 2 * pow(matrixSize, 3);
 		gFLOPS = float(1.0e-9 * numOps / elapsedTime);
-		cout << "[" << id + 1 << "] " << getDeviceName(deviceIDs[optimalPlatformId][id]) << ": " << elapsedTime << " seconds ( " << gFLOPS << " GFLOPS )" << endl;
+		printf("OpenCL          : %.3f seconds ( %f GFLOPS )\n",elapsedTime,gFLOPS);
 		//Release OpenCL resources
 		clReleaseMemObject(d_x);
 		clReleaseMemObject(d_y);
@@ -210,7 +210,7 @@ int main() {
 	clReleaseKernel(kernel);
 	clReleaseContext(context);
 
-	//Run the same code on CPU without OpenCL and time it
+/*	//Run the same code on CPU without OpenCL and time it
 
 	gettimeofday(&start, NULL);
 
@@ -238,8 +238,7 @@ int main() {
 			}
 		}
 	}
-	cout << endl << "Found " << count << " errors in the output matrix of GPU" << endl;
-
-	getchar();
+	cout << endl << "Found " << count << " errors in the output matrix of GPU" << endl;*/
+	
 	return 0;
 }
